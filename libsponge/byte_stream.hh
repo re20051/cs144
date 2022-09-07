@@ -18,15 +18,15 @@ class ByteStream {
     // that's a sign that you probably want to keep exploring
     // different approaches.
 
-    size_t _bytesWritten = 0;
+    size_t _bytesWritten = 0;  //已经写入的字节数
 
-    size_t _bytesRead = 0;
+    size_t _bytesRead = 0;  //已经读取的字节数
 
-    size_t _length = 0;
+    size_t _length = 0;  //当前缓冲区长度
 
-    size_t _capacity{};
+    size_t _capacity{};  //缓冲区容量
 
-    std::deque<char> _buffer{};
+    std::deque<char> _buffer{};  //缓冲区
 
     bool _isEnd = false;  //输入是否已经结束
 

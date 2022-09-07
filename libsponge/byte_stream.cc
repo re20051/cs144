@@ -34,15 +34,19 @@ size_t ByteStream::write(const string &data) {
 
 //! \param[in] len bytes will be copied from the output side of the buffer
 string ByteStream::peek_output(const size_t len) const {
+    //确保长度不会超过缓冲区长度
     size_t strlen = min(len, _length);
     return string(_buffer.begin(), _buffer.begin() + strlen);
 }
 
 //! \param[in] len bytes will be removed from the output side of the buffer
 void ByteStream::pop_output(const size_t len) {
+    //确保长度不会超过缓冲区长度
     size_t strlen = min(len, _length);
     _buffer.erase(_buffer.begin(), _buffer.begin() + strlen);
+    //更新缓冲区长度
     _length -= strlen;
+    //更新已经读取的字节数
     _bytesRead += strlen;
 }
 
@@ -50,6 +54,8 @@ void ByteStream::pop_output(const size_t len) {
 //! \param[in] len bytes will be popped and returned
 //! \returns a string
 std::string ByteStream::read(const size_t len) {
+    //先提取字符串，再pop
+    //确保长度不会超过缓冲区长度
     size_t strlen = min(len, _length);
     string result = peek_output(strlen);
     pop_output(strlen);
@@ -64,6 +70,7 @@ size_t ByteStream::buffer_size() const { return _length; }
 
 bool ByteStream::buffer_empty() const { return _length == 0; }
 
+//必须已经输入完毕且缓冲区为空
 bool ByteStream::eof() const { return _isEnd && buffer_empty(); }
 
 size_t ByteStream::bytes_written() const { return _bytesWritten; }
