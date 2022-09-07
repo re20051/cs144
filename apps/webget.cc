@@ -7,11 +7,7 @@
 using namespace std;
 
 void get_URL(const string &host, const string &path) {
-    // Your code here.
-
-    /*rying 104.196.238.229...
-    Connected to cs144.keithw.org.
-    Escape character is '^]'.*/
+    //建立地址，套接字，socket连接到该地址上
     const Address myAddress(host, "http");
     TCPSocket sock1;
     sock1.connect(myAddress);
