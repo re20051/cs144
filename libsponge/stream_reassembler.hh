@@ -4,7 +4,10 @@
 #include "byte_stream.hh"
 
 #include <cstdint>
+#include <set>
 #include <string>
+
+using namespace std;
 
 //! \brief A class that assembles a series of excerpts from a byte stream (possibly out of order,
 //! possibly overlapping) into an in-order byte stream.
@@ -12,8 +15,34 @@ class StreamReassembler {
   private:
     // Your code here -- add private members as necessary.
 
+    string _stream = "";
+
     ByteStream _output;  //!< The reassembled in-order byte stream
     size_t _capacity;    //!< The maximum number of bytes
+
+    uint64_t _first_unassembled = 0;
+
+    bool _iseof = false;
+
+    struct segment {
+        string payload = "";
+        size_t index = 0;
+        bool operator<(const segment seg) const { return index < seg.index; };
+    };
+
+    std::set<segment> _fragments{};
+
+    //判断传入的tcp有效载荷是否存在一部分能存入流重组器中
+    bool isValid(string &data, size_t &index, bool eof);
+
+    //将新的字符串加入到碎片集合中
+    void add_fragment_set(string &data, size_t index);
+
+    //新字符串和迭代的segment寻求合并
+    segment merge_fragment(const segment new_seg, const segment old_seg);
+
+    // bytestream尝试从碎片缓冲区中读取新数据
+    void write_into_buffer();
 
   public:
     //! \brief Construct a `StreamReassembler` that will store up to `capacity` bytes.
