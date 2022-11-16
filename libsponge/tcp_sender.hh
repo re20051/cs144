@@ -17,8 +17,6 @@
 //! maintains the Retransmission Timer, and retransmits in-flight
 //! segments if the retransmission timer expires.
 class TCPSender {
-    const static uint64_t _max_package = 1452;
-
   private:
     //! our initial sequence number, the number for our SYN.
     WrappingInt32 _isn;
@@ -119,6 +117,8 @@ class TCPSender {
 
     // 32位序列号转为64位
     bool convert_to_64(uint32_t ackno, uint64_t &abso_seq);
+
+    size_t accumulate_seconds() const;
 };
 
 #endif  // SPONGE_LIBSPONGE_TCP_SENDER_HH

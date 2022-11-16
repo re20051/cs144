@@ -47,7 +47,7 @@ void TCPSender::fill_window() {
         while (_next_seqno < temp_unacceptable && !stream_in().buffer_empty()) {
             TCPSegment segment;
             //限制段的长度
-            size_t length = min(temp_unacceptable - _next_seqno, _max_package);
+            size_t length = min(temp_unacceptable - _next_seqno, TCPConfig::MAX_PAYLOAD_SIZE);
             //从字节流中读取最多长度为length的字段
             segment.payload() = stream_in().read(length);
             //如果读取结束，且窗口还有空间，带上fin标记
@@ -90,6 +90,14 @@ void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
     _first_unacceptable = abso_seq + window_size;
     _is_window_zero = window_size == 0 ? true : false;
 
+    //如果是一个比原先ack大的确认号
+    if (abso_seq > _has_ack) {
+        //重置RTO，累计ticks以及重传次数
+        _current_retransmission_timeout = _initial_retransmission_timeout;
+        _accumulate_seconds = 0;
+        _consecutive_retransmissions = 0;
+    }
+
     //更新未确认段队列
     while (!_sent_but_not_ack.empty()) {
         //取出第一个未确认(最早的)TCP段
@@ -99,11 +107,6 @@ void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
             //从队列中删除
             _sent_but_not_ack.pop();
             _has_ack += frontSeg.length_in_sequence_space();
-
-            //重置RTO，累计ticks以及重传次数
-            _current_retransmission_timeout = _initial_retransmission_timeout;
-            _accumulate_seconds = 0;
-            _consecutive_retransmissions = 0;
 
         } else
             break;
@@ -140,8 +143,9 @@ void TCPSender::tick(const size_t ms_since_last_tick) {
 unsigned int TCPSender::consecutive_retransmissions() const { return _consecutive_retransmissions; }
 
 void TCPSender::send_empty_segment() {
-    //传一个空段，不需要计时
+    //传一个空段，不需要计时，但需要设置正确的序列号
     TCPSegment segment;
+    segment.header().seqno = wrap(_next_seqno, _isn);
     _segments_out.push(segment);
 }
 
@@ -181,3 +185,6 @@ bool TCPSender::convert_to_64(uint32_t ackno, uint64_t &abso_64_seq) {
 
     return true;
 }
+
+//累计计时
+size_t TCPSender::accumulate_seconds() const { return _accumulate_seconds; }
