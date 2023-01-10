@@ -5,8 +5,11 @@
 #include "tcp_over_ip.hh"
 #include "tun.hh"
 
+#include <map>
 #include <optional>
 #include <queue>
+
+using namespace std;
 
 //! \brief A "network interface" that connects IP (the internet layer, or network layer)
 //! with Ethernet (the network access layer, or link layer).
@@ -30,7 +33,25 @@
 //! request or reply, the network interface processes the frame
 //! and learns or replies as necessary.
 class NetworkInterface {
+    static constexpr size_t _arp_retransmission_timeout = 5000;  // arp请求重传计时
+    static constexpr size_t _arp_expire = 30000;                 // arp生命周期
+
   private:
+    struct arp_life_cycle {
+        EthernetAddress ethernet_address;
+        size_t ticks;
+    };
+    // arp映射表
+    std::map<uint32_t, arp_life_cycle> _ip2mac{};
+
+    // arp请求重传计时
+    std::map<uint32_t, size_t> _arp_retransmit{};
+
+    // 等待arp响应的ip数据报
+    std::deque<pair<uint32_t, InternetDatagram>> _wait_for_reply{};
+
+    uint32_t _accumulate_ticks{0};
+
     //! Ethernet (known as hardware, network-access-layer, or link-layer) address of the interface
     EthernetAddress _ethernet_address;
 
@@ -62,6 +83,15 @@ class NetworkInterface {
 
     //! \brief Called periodically when time elapses
     void tick(const size_t ms_since_last_tick);
+
+    // 封装以太网帧
+    EthernetFrame wrap_frame(uint16_t type, EthernetAddress target_address, BufferList payload);
+
+    // 更新ARP映射表
+    void update_arp_cache(uint32_t ip_address, EthernetAddress ethernet_address);
+
+    // 发送等待队列中目的ip为该ip的所有ip数据报
+    void send_datagrams_by_ip(uint32_t ip);
 };
 
 #endif  // SPONGE_LIBSPONGE_NETWORK_INTERFACE_HH
