@@ -112,8 +112,8 @@ optional<InternetDatagram> NetworkInterface::recv_frame(const EthernetFrame &fra
 //! \param[in] ms_since_last_tick the number of milliseconds since the last call to this method
 void NetworkInterface::tick(const size_t ms_since_last_tick) {
     _accumulate_ticks += ms_since_last_tick;
-    // 销毁过期 ip-mac映射条目
 
+    // 销毁过期 ip-mac映射条目
     for (auto it = _ip2mac.begin(); it != _ip2mac.end();) {
         arp_life_cycle alc = it->second;
         uint32_t ip_address = it->first;
