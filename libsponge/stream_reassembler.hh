@@ -32,13 +32,13 @@ class StreamReassembler {
 
     std::set<segment> _fragments{};
 
-    //判断传入的tcp有效载荷是否存在一部分能存入流重组器中
+    // 判断传入的tcp有效载荷是否存在一部分能存入流重组器中
     bool isValid(string &data, size_t &index, bool eof);
 
-    //将新的字符串加入到碎片集合中
+    // 将新的字符串加入到碎片集合中
     void add_fragment_set(string &data, size_t index);
 
-    //新字符串和迭代的segment寻求合并
+    // 新字符串和迭代的segment寻求合并
     segment merge_fragment(const segment new_seg, const segment old_seg);
 
     // bytestream尝试从碎片缓冲区中读取新数据
