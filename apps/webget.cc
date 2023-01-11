@@ -1,4 +1,5 @@
-#include "socket.hh"
+// #include "socket.hh"
+#include "tcp_sponge_socket.hh"
 #include "util.hh"
 
 #include <cstdlib>
@@ -7,19 +8,19 @@
 using namespace std;
 
 void get_URL(const string &host, const string &path) {
-    //建立地址，套接字，socket连接到该地址上
+    // 建立地址，套接字，socket连接到该地址上
     const Address myAddress(host, "http");
-    TCPSocket sock1;
+    FullStackSocket sock1;
     sock1.connect(myAddress);
 
     sock1.write("GET " + path + " HTTP/1.1\r\n" + "Host: " + host + "\r\n" + "Connection: close\r\n\r\n");
 
-    //一直读取内容，直至eof
+    // 一直读取内容，直至eof
     while (!sock1.eof()) {
         cout << sock1.read();
     }
 
-    //关闭套接字
+    // 关闭套接字
     sock1.close();
 
     cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
