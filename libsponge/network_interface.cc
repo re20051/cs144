@@ -135,11 +135,7 @@ EthernetFrame NetworkInterface::wrap_frame(uint16_t type, EthernetAddress target
 }
 
 void NetworkInterface::update_arp_cache(uint32_t ip_address, EthernetAddress ethernet_address) {
-    arp_life_cycle alc;
-    alc.ethernet_address = ethernet_address;
-    alc.ticks = _accumulate_ticks;
-
-    _ip2mac[ip_address] = alc;
+    _ip2mac[ip_address] = arp_life_cycle{ethernet_address, _accumulate_ticks};
 }
 
 void NetworkInterface::send_datagrams_by_ip(uint32_t ip) {
