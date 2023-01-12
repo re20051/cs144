@@ -52,6 +52,7 @@ class Router {
         size_t interface_num{0};
     };
 
+    // 静态路由表
     std::deque<Route> _route_table{};
 
     //! Send a single datagram from the appropriate outbound interface to the next hop,

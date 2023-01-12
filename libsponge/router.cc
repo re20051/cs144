@@ -51,6 +51,7 @@ void Router::route_one_datagram(InternetDatagram &dgram) {
 
     for (auto it = _route_table.begin(); it != _route_table.end(); it++) {
         uint8_t length = it->prefix_length;
+
         // 首先判断是否匹配
         if (length == 0 || (target_ip >> (32 - length)) == (it->route_prefix >> (32 - length))) {
             // 如果匹配，满足最长匹配原则
